@@ -1,4 +1,4 @@
-import { Joi } from 'express-validation';
+import Joi from 'joi';
 
 export default {
   // POST /api/users

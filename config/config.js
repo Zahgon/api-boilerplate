@@ -1,8 +1,8 @@
 /**
- * express-validation exposes a version of Joi as a hard dependency,
- * in order to avoid compatibility issues with other versions of Joi.
+ * Joi is depended upon directly, so that the schema dialect used for
+ * environment validation and for request validation stays the same one.
  */
-import { Joi } from 'express-validation';
+import Joi from 'joi';
 
 // require and configure dotenv, will load vars in .env in PROCESS.ENV
 require('dotenv').config();

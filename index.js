@@ -1,6 +1,6 @@
 import { loggers } from 'winston';
 import config from './config/config';
-import app from './config/express';
+import app from './config/fastify';
 /* eslint-disable no-unused-vars */
 import db from './config/sequelize';
 
@@ -21,7 +21,8 @@ db.sequelize
     // module.parent check is required to support mocha watch
     if (!module.parent) {
       // listen on port config.port
-      app.listen(config.port, () => {
+      // bind on every interface, as the previous listener did by default
+      app.listen({ port: config.port, host: '0.0.0.0' }, () => {
         logger.info(`The application has started on port ${config.port} (${config.env})`, {
           port: config.port,
           node_env: config.env,

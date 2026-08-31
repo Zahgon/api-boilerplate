@@ -12,39 +12,38 @@ const user = {
 
 /**
  * Returns jwt token if valid username and password is provided
- * @param req
- * @param res
- * @param next
+ * @param request
+ * @param reply
  * @returns {*}
  */
-function login(req, res, next) {
+function login(request, reply) {
   // Ideally you'll fetch this from the db
   // Idea here was to show how jwt works with simplicity
-  if (req.body.username === user.username && req.body.password === user.password) {
+  if (request.body.username === user.username && request.body.password === user.password) {
     const token = jwt.sign({
       username: user.username,
       expiresIn: 3600,
     }, config.jwtSecret);
-    return res.json({
+    return reply.json({
       token,
       username: user.username,
     });
   }
 
   const err = new APIError('Authentication error', httpStatus.UNAUTHORIZED, true);
-  return next(err);
+  throw err;
 }
 
 /**
  * This is a protected route. Will return random number only if jwt token is provided in header.
- * @param req
- * @param res
+ * @param request
+ * @param reply
  * @returns {*}
  */
-function getRandomNumber(req, res) {
-  // req.user is assigned by jwt middleware if valid token is provided
-  return res.json({
-    user: req.user,
+function getRandomNumber(request, reply) {
+  // request.user is assigned by jwt middleware if valid token is provided
+  return reply.json({
+    user: request.user,
     num: Math.random() * 100,
   });
 }

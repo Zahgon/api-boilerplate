@@ -1,16 +1,14 @@
-import express from 'express';
 import userRoutes from './user.route';
 import authRoutes from './auth.route';
 
-const router = express.Router(); // eslint-disable-line new-cap
+export default async function routes(router) {
+  /** GET /health-check - Check service health */
+  // res.send() on a string answered as HTML, so keep the content type explicit
+  router.get('/health-check', (request, reply) => reply.type('text/html; charset=utf-8').send('OK'));
 
-/** GET /health-check - Check service health */
-router.get('/health-check', (req, res) => res.send('OK'));
+  // mount user routes at /users
+  router.register(userRoutes, { prefix: '/users' });
 
-// mount user routes at /users
-router.use('/users', userRoutes);
-
-// mount auth routes at /auth
-router.use('/auth', authRoutes);
-
-export default router;
+  // mount auth routes at /auth
+  router.register(authRoutes, { prefix: '/auth' });
+}

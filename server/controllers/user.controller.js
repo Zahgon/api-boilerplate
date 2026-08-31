@@ -4,85 +4,77 @@ import db from '../../config/sequelize';
 const { User } = db;
 
 /**
- * Load user and append to req.
+ * Load user and append to request.
  */
-function load(req, res, next, id) {
-  User.findOne({ where: { id } })
-    .then((user) => {
-      if (!user) {
-        const e = new Error('User does not exist');
-        e.status = httpStatus.NOT_FOUND;
-        return next(e);
-      }
-      req.user = user; // eslint-disable-line no-param-reassign
-      return next();
-    })
-    .catch((e) => next(e));
+async function load(request, id) {
+  const user = await User.findOne({ where: { id } });
+  if (!user) {
+    const e = new Error('User does not exist');
+    e.status = httpStatus.NOT_FOUND;
+    throw e;
+  }
+  request.user = user; // eslint-disable-line no-param-reassign
 }
 
 /**
  * Get user
  * @returns {User}
  */
-function get(req, res) {
-  return res.json(req.user);
+function get(request, reply) {
+  return reply.json(request.user);
 }
 
 /**
  * Create new user
- * @property {string} req.body.username - The username of user.
- * @property {string} req.body.mobileNumber - The mobileNumber of user.
+ * @property {string} request.body.username - The username of user.
+ * @property {string} request.body.mobileNumber - The mobileNumber of user.
  * @returns {User}
  */
-function create(req, res, next) {
+async function create(request, reply) {
   const user = User.build({
-    username: req.body.username,
+    username: request.body.username,
   });
 
-  user.save()
-    .then((savedUser) => res.json(savedUser))
-    .catch((e) => next(e));
+  const savedUser = await user.save();
+  return reply.json(savedUser);
 }
 
 /**
  * Update existing user
- * @property {string} req.body.username - The username of user.
- * @property {string} req.body.mobileNumber - The mobileNumber of user.
+ * @property {string} request.body.username - The username of user.
+ * @property {string} request.body.mobileNumber - The mobileNumber of user.
  * @returns {User}
  */
-function update(req, res, next) {
-  const { user } = req;
-  user.username = req.body.username;
-  user.mobileNumber = req.body.mobileNumber;
+async function update(request, reply) {
+  const { user } = request;
+  user.username = request.body.username;
+  user.mobileNumber = request.body.mobileNumber;
 
-  user.save()
-    .then((savedUser) => res.json(savedUser))
-    .catch((e) => next(e));
+  const savedUser = await user.save();
+  return reply.json(savedUser);
 }
 
 /**
  * Get user list.
- * @property {number} req.query.skip - Number of users to be skipped.
- * @property {number} req.query.limit - Limit number of users to be returned.
+ * @property {number} request.query.skip - Number of users to be skipped.
+ * @property {number} request.query.limit - Limit number of users to be returned.
  * @returns {User[]}
  */
-function list(req, res, next) {
-  const { limit = 50 } = req.query;
-  User.findAll({ limit })
-    .then((users) => res.json(users))
-    .catch((e) => next(e));
+async function list(request, reply) {
+  const { limit = 50 } = request.query;
+  const users = await User.findAll({ limit });
+  return reply.json(users);
 }
 
 /**
  * Delete user.
  * @returns {User}
  */
-function remove(req, res, next) {
-  const { user } = req;
-  const { username } = req.user;
-  user.destroy()
-    .then(() => res.json(username))
-    .catch((e) => next(e));
+async function remove(request, reply) {
+  const { user } = request;
+  const { username } = request.user;
+  await user.destroy();
+  return reply.json(username);
 }
 
 export default {
