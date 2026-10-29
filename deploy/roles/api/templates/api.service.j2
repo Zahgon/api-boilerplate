@@ -1,15 +1,15 @@
 [Unit]
-Description=Express
+Description=amida api-boilerplate (Fastify)
 
 [Service]
-# Start the js-file starting the express server
+# Start the js-file starting the Fastify server
 ExecStart={{ src_dir }}/dist/node_modules/.bin/gulp serve
 WorkingDirectory={{ src_dir }}/dist
 Restart=always
 RestartSec=10
 StandardOutput=syslog
 StandardError=syslog
-SyslogIdentifier=Express
+SyslogIdentifier=api-boilerplate
 # Change to a non-root user (optional, but recommended)
 #User=<alternate user>
 #Group=<alternate group>

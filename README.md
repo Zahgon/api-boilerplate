@@ -2,7 +2,7 @@
 
 ## Overview
 
-This is a boilerplate application for building REST APIs in Node.js using ES6 and Express. Intended for use with PostgreSQL using Sequelize ORM.
+This is a boilerplate application for building REST APIs in Node.js using ES6 and Fastify. Intended for use with PostgreSQL using Sequelize ORM.
 
 ### Features
 
@@ -15,14 +15,23 @@ This is a boilerplate application for building REST APIs in Node.js using ES6 an
 | ES6 Code Coverage via [Jest](https://www.npmjs.com/package/jest) | Supports code coverage of ES6 code using Jest. Code coverage reports are saved in `coverage/` directory post `yarn test:coverage` execution. Open `coverage/lcov-report/index.html` to view coverage report. `yarn test:coverage` also displays code coverage summary on console. |
 | Debugging via [debug](https://www.npmjs.com/package/debug) | Instead of inserting and deleting console.log you can replace it with the debug function and just leave it there. You can then selectively debug portions of your code by setting DEBUG env variable. If DEBUG env variable is not set, nothing is displayed to the console. |
 | Promisified Code via [bluebird](https://github.com/petkaantonov/bluebird) | We love promise, don't we? All our code is promisified and even so our tests via [supertest-as-promised](https://www.npmjs.com/package/supertest-as-promised). |
-| API parameter validation via [express-validation](https://www.npmjs.com/package/express-validation) | Validate body, params, query, headers and cookies of a request (via middleware) and return a response with errors; if any of the configured validation rules fail. You won't anymore need to make your route handler dirty with such validations. |
+| API parameter validation via [joi](https://www.npmjs.com/package/joi) | Validate body, params, query, headers and cookies of a request (via a route hook) and return a response with errors; if any of the configured validation rules fail. You won't anymore need to make your route handler dirty with such validations. |
 | Pre-commit hooks | Runs lint and tests before any commit is made locally, making sure that only tested and quality code is committed |
-| Secure app via [helmet](https://github.com/helmetjs/helmet) | Helmet helps secure Express apps by setting various HTTP headers. |
+| Secure app via [@fastify/helmet](https://github.com/fastify/fastify-helmet) | Helmet helps secure apps by setting various HTTP headers. |
 | Uses [yarn](https://yarnpkg.com) over npm | Uses yarn package manager by facebook. You can read more about it [here](https://code.facebook.com/posts/1840075619545360) |
 
-- CORS support via [cors](https://github.com/expressjs/cors)
+- CORS support via [@fastify/cors](https://github.com/fastify/fastify-cors)
 - Uses [http-status](https://www.npmjs.com/package/http-status) to set http status code. It is recommended to use `httpStatus.INTERNAL_SERVER_ERROR` instead of directly using `500` when setting status code.
 - Has `.editorconfig` which helps developers define and maintain consistent coding styles between different editors and IDEs.
+
+### API behaviour
+
+- **Request IDs.** Every response carries `X-Request-Id`: the client's own value when it sends one `X-Request-Id` of 1 to 64 characters from `A-Z a-z 0-9 . _ -`, otherwise a fresh UUID v4.
+- **Paging.** `GET /users` lists users in `id` order, honours `skip` as an offset next to `limit` (default 50) and reports the number of stored users in `X-Total-Count`. CORS exposes `X-Request-Id` and `X-Total-Count`.
+- **Username conflicts.** Usernames are unique regardless of letter case: creating or renaming a user to a username another user already has, in any letter case, answers `409 Username already exists`, also when such requests race.
+- **Conditional writes.** `PUT` and `DELETE /users/:userId` honour `If-Match` against the user's current `ETag` and answer `412` when it does not match.
+- **Writes that race.** Creates, updates and deletes take a table lock and read the user again under it: of concurrent `PUT`s or `DELETE`s carrying the same current `If-Match` only one succeeds and the others answer `412`, and a user deleted by a concurrent request answers `404` to every other update or delete.
+- **Graceful shutdown.** On `SIGTERM` or `SIGINT` the server stops accepting connections, finishes the requests in flight, closes the database pool and exits with status 0.
 
 ## Getting Started
 

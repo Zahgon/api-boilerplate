@@ -11,9 +11,9 @@
 - name: Copy systemd service
   sudo: yes
   template:
-    src: express.service.j2
-    dest: /etc/systemd/system/express.service
+    src: api.service.j2
+    dest: /etc/systemd/system/api.service
 
 - name: Enable api service
   sudo: yes
-  service: name=express state=started enabled=yes
+  service: name=api state=started enabled=yes

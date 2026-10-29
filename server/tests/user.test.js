@@ -11,8 +11,11 @@ const apiVersionPath = `/api/v${config.apiVersion}`;
 describe('## User APIs', () => {
   let testApp;
 
-  beforeAll(() => {
-    testApp = request(app);
+  beforeAll(async () => {
+    // the routes are only mounted once the framework has finished booting,
+    // and supertest drives the underlying server rather than the app object
+    await app.ready();
+    testApp = request(app.server);
   });
 
   afterAll((done) => {
